@@ -1,0 +1,10 @@
+L	24
+J	1.000000
+beta	0.720000
+estado_inicial	hot
+N_sweps_entre_medidas	1
+N_medidas	5000
+Metodo	Wilson
+Indice_configuracion	3
+Tamanio_loop	10x10
+Observables	tiempo,energia_plaqueta,w10,magnetizacion
