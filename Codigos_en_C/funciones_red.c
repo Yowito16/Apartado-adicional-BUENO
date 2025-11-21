@@ -253,4 +253,59 @@ void dame_wilsons_nn(int *aristas, int *wilsons, int n){
     }
 }
 
+//Funcion para precalcular la tabla de valores de spin para la nueva variable
+void precalcula_tabla_spin(double beta_val, double *tabla_spin){
+    double S_l;
+    for (int i=0;i<5;i++){
+        S_l = (double) 2.0*i-4.0;
+        tabla_spin[i]=tanh(beta_val*S_l*J);
+    }
+}
+
+//Precálculo del promedio local para bloques de esquina
+void precalcula_tabla_bloque(double beta_val, double tabla_bloque[4][4][2][2][2]){
+    int i, j, k, l, m;
+    double S1, S2, Up, sigma1, sigma2;
+
+    // Recorremos todas las configuraciones posibles del entorno (S1, S2, Up)
+    for (i = 0; i < 4; i++) {
+        S1 = (double)(i * 2 - 3); 
+        for (j = 0; j < 4; j++) {
+            S2 = (double)(j * 2 - 3); 
+            for (k = 0; k < 2; k++) {
+                Up = (double)(k * 2 - 1);
+                for (l = 0; l < 2; l++) {     // sigma1 actual
+                    sigma1=(double)(l*2-1);
+                    for (m = 0; m < 2; m++) { // sigma2 actual
+                        sigma2=(double)(m*2-1);
+                        tabla_bloque[i][j][k][l][m]=exp(beta_val*J*(S1*sigma1 + S2*sigma2 + Up*sigma1*sigma2));
+                    }
+                }
+            }
+        }
+    }
+}
+
+//Cálculo del promedio local para bloques de esquina
+void promedio_bloque(double beta_val, double tabla_promedio[4][4][2]){
+    int i, j, k, l, m;
+    double numerador, denominador;
+    double S1, S2, Up;
+    double tabla_bloque[4][4][2][2][2];
+    double W1, W2, W3, W4;// W1=W++, W2=W-+, W3=W+-, W4=W--
+    precalcula_tabla_bloque(beta_val, tabla_bloque);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            for (k = 0; k < 2; k++) {
+                W1 = tabla_bloque[i][j][k][1][1]; //W++
+                W2 = tabla_bloque[i][j][k][0][1]; //W-+
+                W3 = tabla_bloque[i][j][k][1][0]; //W+-
+                W4 = tabla_bloque[i][j][k][0][0]; //W--
+                numerador= W1 - W2 - W3 + W4;
+                denominador= W1 + W2 + W3 + W4;
+                tabla_promedio[i][j][k] = numerador / denominador;
+            }
+        }
+    }
+}
 

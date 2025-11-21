@@ -247,6 +247,30 @@
             "type": "shell",
             "command": ".\\TESTS\\producto_igual_1.exe",
             "group": "test"
+        },
+        {
+            "label": "compilar TEST_funcionesred",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "Codigos_en_C\\funciones_red.c",
+                "Codigos_en_C\\random.c",
+                "Codigos_en_C\\tests_funcionesred.c",
+                "-o",
+                "Codigos_en_C\\tests_funcionesred.exe",
+                "-lm"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "ejecutar TEST_funcionesred",
+            "type": "shell",
+            "command": ".\\Codigos_en_C\\tests_funcionesred.exe",
+            "group": "test"
         }
 
     ]

@@ -64,3 +64,9 @@ double prom_Wilson_loops(int n, int *aristas);
 
 
 void inicializa_nodos_wilson( int n, int m, int nodos_wilson[][m][2]);
+
+void precalcula_tabla_spin(double beta_val, double *tabla_spin);
+
+void precalcula_tabla_bloque(double beta_val, double tabla_bloque[4][4][2][2][2]);
+
+void promedio_bloque(double beta_val, double tabla_promedio[4][4][2]);
