@@ -70,3 +70,15 @@ void precalcula_tabla_spin(double beta_val, double *tabla_spin);
 void precalcula_tabla_bloque(double beta_val, double tabla_bloque[4][4][2][2][2]);
 
 void promedio_bloque(double beta_val, double tabla_promedio[4][4][2]);
+
+int indice_lado(int *plaquetas, int *aristas, int arista_actual);
+
+void indices_esquinas(int *aristas, int *plaquetas, int nodo, int plano, int arista_1, int arista_2, int N_esquina, int *inidce_S1, int *indicce_S2, int *indice_Up);
+
+void dame_O_n(int *aristas, int *plaquetas, int *O, int n, double tabla_promedio[4][4][2], double tabla_spin[5]);
+
+double un_loop_O_x(int Nodo_inicial, int *aristas, int *plaquetas, int n, double tabla_promedio[4][4][2], double tabla_spin[5]);
+
+double un_loop_O_y(int Nodo_inicial, int *aristas, int *plaquetas, int n, double tabla_promedio[4][4][2], double tabla_spin[5]);
+
+double un_loop_O_z(int Nodo_inicial, int *aristas, int *plaquetas, int n, double tabla_promedio[4][4][2], double tabla_spin[5]);

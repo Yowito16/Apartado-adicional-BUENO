@@ -309,3 +309,260 @@ void promedio_bloque(double beta_val, double tabla_promedio[4][4][2]){
     }
 }
 
+int indice_lado(int *plaquetas, int *aristas, int arista_actual){
+    int Sl=0;
+    int indices_plaquetas[4];
+
+    //ESTA FUNCION TE DA EL INDICE DE LAS 4 PLAQUETAS A LAS QUE PERTENECE ARISTA_ACTUAL
+    posicion_plaquetas(arista_actual,indices_plaquetas);
+
+    for(int i=0;i<4;i++){//SUMAMOS EL VALOR DE LAS 4 PLAQUETAS
+        Sl+=plaquetas[indices_plaquetas[i]];
+    }
+    //SL ES SOLO EL PRODUCTO DE LAS 3 ARISTAS QUE ACOMPAÑAN A LA ARISTA_ACTUAL
+    Sl/=arista_actual;
+    //DEVOLVEMOS EL INDICE PARA LA FUNCION PRECALCULA_TABLA_SPIN
+    return (Sl+4)/2;
+}
+
+void indices_esquinas(int *aristas, int *plaquetas, int nodo, int plano, int arista_1, int arista_2, int N_esquina, int *inidce_S1, int *indicce_S2, int *indice_Up){
+    int S1=0,S2=0,Up=0;
+    int posiciones_plaquetas_1[4], posiciones_plaquetas_2[4], indice_plaqueta;
+
+    posicion_plaquetas(arista_1,posiciones_plaquetas_1);
+    posicion_plaquetas(arista_2,posiciones_plaquetas_2);
+
+    for(int i=0;i<4;i++){
+        S1+=plaquetas[posiciones_plaquetas_1[i]];
+        S2+=plaquetas[posiciones_plaquetas_2[i]];
+    }
+
+    switch (plano)
+    {
+    case 0:
+        switch (N_esquina)
+        {
+        case 0:
+            indice_plaqueta=3*nodo;
+            break;
+        case 1:
+            indice_plaqueta=3*(nodo+xm[nodo]);
+            break;
+        case 2:
+            nodo=nodo+ym[nodo];
+            indice_plaqueta=3*(nodo+xm[nodo]);
+            break;
+        case 3:
+            indice_plaqueta=3*(nodo+ym[nodo]);
+            break;
+        default:
+            break;
+        }
+    case 1:
+        switch (N_esquina)
+        {
+        case 0:
+            indice_plaqueta=3*nodo+1;
+            break;
+        case 1:
+            indice_plaqueta=3*(nodo+xm[nodo])+1;
+            break;
+        case 2:
+            nodo=nodo+zm[nodo];
+            indice_plaqueta=3*(nodo+xm[nodo])+1;
+            break;
+        case 3:
+            indice_plaqueta=3*(nodo+zm[nodo])+1;
+            break;
+        default:
+            break;
+        }
+    case 2:
+        switch (N_esquina)
+        {
+        case 0:
+            indice_plaqueta=3*nodo+2;
+            break;
+        case 1:
+            indice_plaqueta=3*(nodo+ym[nodo])+2;
+            break;
+        case 2:
+            nodo=nodo+zm[nodo];
+            indice_plaqueta=3*(nodo+ym[nodo])+2;
+            break;
+        case 3:
+            indice_plaqueta=3*(nodo+zm[nodo])+2;
+            break;
+        default:
+            break;
+        }   
+    }
+
+    S1-=plaquetas[indice_plaqueta];
+    S2-=plaquetas[indice_plaqueta];
+
+    S1/=aristas[arista_1];
+    S2/=aristas[arista_2];
+    Up=plaquetas[indice_plaqueta]/aristas[arista_1]/aristas[arista_2];
+
+
+    inidce_S1=(S1+3)/2;
+    indicce_S2=(S2+3)/2;
+    indice_Up=(Up+1)/2;
+}
+
+void dame_O_n(int *aristas, int *plaquetas, int *O, int n, double tabla_promedio[4][4][2], double tabla_spin[5]){
+    int V=L*L*L;
+    for(int i=0;i<V;i++){
+        O[3*i]=un_loop_O_x(i,aristas,plaquetas,n,tabla_promedio,tabla_spin);
+        O[3*i+1]=un_loop_O_y(i,aristas,plaquetas,n,tabla_promedio,tabla_spin);
+        O[3*i+2]=un_loop_O_z(i,aristas,plaquetas,n,tabla_promedio,tabla_spin);
+    }
+}
+
+double un_loop_O_x(int Nodo_inicial, int *aristas, int *plaquetas, int n, double tabla_promedio[4][4][2], double tabla_spin[5]){
+    double On=1.0;//lo defino como 1 porque voy a multiplicar las esperanzas locales
+    int indice_S1, indice_S2, indice_Up;
+
+    int nodo=Nodo_inicial;
+
+    indices_esquinas(aristas,plaquetas,nodo,0,3*nodo,3*nodo+1,0,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo=nodo+xp[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo)];
+        nodo+=xp[nodo];
+    }
+
+    nodo+=xp[nodo];
+    indices_esquinas(aristas,plaquetas,nodo,0,3*(nodo+xm[nodo]),3*nodo+1,1,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=yp[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+1)];
+        nodo+=yp[nodo];
+    }
+
+    nodo+=yp[nodo];
+    indices_esquinas(aristas,plaquetas,nodo,0,3*(nodo+xm[nodo]),3*(nodo+ym[nodo])+1,2,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=xm[nodo];
+    nodo+=xm[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo)];
+        nodo+=xm[nodo];
+    }
+
+    indices_esquinas(aristas,plaquetas,nodo,0,3*nodo,3*(nodo+ym[nodo])+1,3,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=ym[nodo];
+    nodo+=ym[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+1)];
+        nodo+=ym[nodo];
+    }
+
+    return On;
+}
+
+double un_loop_O_y(int Nodo_inicial, int *aristas, int *plaquetas, int n, double tabla_promedio[4][4][2], double tabla_spin[5]){
+    double On=1.0;//lo defino como 1 porque voy a multiplicar las esperanzas locales
+    int indice_S1, indice_S2, indice_Up;
+
+    int nodo=Nodo_inicial;
+
+    indices_esquinas(aristas,plaquetas,nodo,1,3*nodo,3*nodo+2,0,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo=nodo+xp[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo)];
+        nodo+=xp[nodo];
+    }
+
+    nodo+=xp[nodo];
+    indices_esquinas(aristas,plaquetas,nodo,1,3*(nodo+xm[nodo]),3*nodo+2,1,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=zp[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+2)];
+        nodo+=zp[nodo];
+    }
+
+    nodo+=zp[nodo];
+    indices_esquinas(aristas,plaquetas,nodo,1,3*(nodo+xm[nodo]),3*(nodo+zm[nodo])+2,2,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=xm[nodo];
+    nodo+=xm[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo)];
+        nodo+=xm[nodo];
+    }
+
+    indices_esquinas(aristas,plaquetas,nodo,1,3*nodo,3*(nodo+zm[nodo])+2,3,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=zm[nodo];
+    nodo+=zm[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+2)];
+        nodo+=zm[nodo];
+    }
+
+    return On;
+}
+
+double un_loop_O_z(int Nodo_inicial, int *aristas, int *plaquetas, int n, double tabla_promedio[4][4][2], double tabla_spin[5]){
+    double On=1.0;//lo defino como 1 porque voy a multiplicar las esperanzas locales
+    int indice_S1, indice_S2, indice_Up;
+
+    int nodo=Nodo_inicial;
+
+    indices_esquinas(aristas,plaquetas,nodo,2,3*nodo+1,3*nodo+2,0,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo=nodo+yp[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+1)];
+        nodo+=yp[nodo];
+    }
+
+    nodo+=yp[nodo];
+    indices_esquinas(aristas,plaquetas,nodo,2,3*(nodo+ym[nodo])+1,3*nodo+2,1,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=zp[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+2)];
+        nodo+=zp[nodo];
+    }
+
+    nodo+=zp[nodo];
+    indices_esquinas(aristas,plaquetas,nodo,2,3*(nodo+ym[nodo])+1,3*(nodo+zm[nodo])+2,2,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=ym[nodo];
+    nodo+=ym[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+1)];
+        nodo+=ym[nodo];
+    }
+
+    indices_esquinas(aristas,plaquetas,nodo,2,3*nodo+1,3*(nodo+zm[nodo])+2,3,&indice_S1,&indice_S2,&indice_Up);
+    On=On*tabla_promedio[indice_S1][indice_S2][indice_Up];
+    nodo+=zm[nodo];
+    nodo+=zm[nodo];
+
+    for(int i=0;i<(n-2);i++){
+        On=On*tabla_spin[indice_lado(plaquetas, aristas, 3*nodo+2)];
+        nodo+=zm[nodo];
+    }
+
+    return On;
+}
