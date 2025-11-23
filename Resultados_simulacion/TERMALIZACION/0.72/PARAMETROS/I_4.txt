@@ -1,4 +1,10 @@
-Tiempo_total_Wilson_10x10(s)	24.571000
- - Metropolis: 4.72 s (19.2%)
- - Cálculos w10: 19.82 s (80.6%)
- - I/O: 0.04 s (0.2%)
+L	24
+J	1.000000
+beta	0.720000
+estado_inicial	hot
+N_sweps_entre_medidas	1
+N_medidas	5000
+Tiempo_total(s)	160.935000
+ - Metropolis: 5.09 s (3.2%)
+ - Cálculos: 155.78 s (96.8%)
+ - I/O: 0.06 s (0.0%)

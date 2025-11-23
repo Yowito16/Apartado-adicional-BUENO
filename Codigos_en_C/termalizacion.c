@@ -60,21 +60,25 @@ int main(){
     
     inicializa_PR(12345);
     int s[3*L*L*L], plaquetas[3*L*L*L];
-    double probabilidades[5];
+    double probabilidades[5], tabla_spin[5], tabla_bloque[4][4][2];
     int FLAG_INI=1;
     int un_sweep=3*L*L*L;
     int N_sweps_entre_med=1;
-    int N_medidas=40000;
+    int N_medidas=5000;
+
+
+    vector_cociente_prob(probabilidades);
+    inicializa_vectores_de_vecinos();
+    precalcula_tabla_spin(beta, tabla_spin);
+    promedio_bloque(beta, tabla_bloque);
 
     for(int FLAG_INI=0;FLAG_INI<2;FLAG_INI++){
 
     for(int j=0;j<10;j++){
-    vector_cociente_prob(probabilidades);
-    inicializa_vectores_de_vecinos();
     crea_configuracionInicial(FLAG_INI, s);
     dame_plaquetas(s, plaquetas);
     guardar_parametros(FLAG_INI,N_sweps_entre_med,N_medidas);
-    dinamica_metropolis(N_sweps_entre_med, N_medidas, probabilidades,s, plaquetas);
+    dinamica_metropolis_O(N_sweps_entre_med, N_medidas, probabilidades,s, plaquetas, tabla_spin, tabla_bloque);
     }
     }
 

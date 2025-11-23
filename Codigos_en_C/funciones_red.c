@@ -358,7 +358,7 @@ void indices_esquinas(int *aristas, int *plaquetas, int nodo, int plano, int ari
             break;
         default:
             break;
-        }
+        }break;
     case 1:
         switch (N_esquina)
         {
@@ -377,7 +377,7 @@ void indices_esquinas(int *aristas, int *plaquetas, int nodo, int plano, int ari
             break;
         default:
             break;
-        }
+        }break;
     case 2:
         switch (N_esquina)
         {
@@ -396,7 +396,10 @@ void indices_esquinas(int *aristas, int *plaquetas, int nodo, int plano, int ari
             break;
         default:
             break;
-        }   
+        }break;
+        
+    default:
+        break;
     }
 
     S1-=plaquetas[indice_plaqueta];

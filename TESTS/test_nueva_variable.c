@@ -20,7 +20,7 @@ int main() {
 
     // Parámetros de la prueba
     double beta_test = 0.72;
-    int n_loop = 3; // Loop de 3x3
+    int n_loop = 5; // Loop de 3x3
     int V = 3 * L * L * L; // Volumen total de enlaces
 
     // Memoria
@@ -34,7 +34,15 @@ int main() {
 
     // Precalcular Tablas
     precalcula_tabla_spin(beta_test, tabla_spin);
+    printf("\n\n************TABLA SPIN**************\n\n");
+    for(int i=0;i<5;i++)printf("\n%f",tabla_spin[i]);
     promedio_bloque(beta_test, tabla_bloque);
+    printf("\n\n************TABLA BLOQUE**************\n\n");
+    for(int i=0;i<4;i++){printf("\n\n\n");
+    for(int j=0;j<4;j++){printf("\n");
+    for(int k=0;k<2;k++)
+    printf("\t%f",tabla_bloque[i][j][k]);
+    }}
 
     printf("\n" YEL "==========================================================\n");
     printf("      TEST FINAL DE VALIDACIÓN: VARIABLE DE PARISI\n");
@@ -98,7 +106,7 @@ int main() {
     
     crea_configuracion(0, s); // 0 = aleatoria
     dame_plaquetas(s, plaquetas); // IMPORTANTE: Actualizar plaquetas tras cambiar espines
-
+    
     // Ejecutar tu función en entorno real
     dame_O_n(s, plaquetas, O_n, n_loop, tabla_bloque, tabla_spin);
 
@@ -108,7 +116,7 @@ int main() {
     
     int ceros_detectados = 0;
     for(int i=0; i<5; i++) {
-        printf("  %d  |  % .4f  |  % .4f  |  % .4f  |\n", 
+        printf("  %d  |  % .8f  |  % .8f  |  % .8f  |\n", 
                i, O_n[3*i], O_n[3*i+1], O_n[3*i+2]);
         
         if(O_n[3*i] == 0.0) ceros_detectados++;
