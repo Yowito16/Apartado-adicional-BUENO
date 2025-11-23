@@ -255,6 +255,7 @@
             "args": [
                 "Codigos_en_C\\funciones_red.c",
                 "Codigos_en_C\\random.c",
+                "Codigos_en_C\\funciones_dinamica.c",
                 "Codigos_en_C\\tests_funcionesred.c",
                 "-o",
                 "Codigos_en_C\\tests_funcionesred.exe",
@@ -270,6 +271,31 @@
             "label": "ejecutar TEST_funcionesred",
             "type": "shell",
             "command": ".\\Codigos_en_C\\tests_funcionesred.exe",
+            "group": "test"
+        },{
+            "label": "compilar TEST_variable_O",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-I", "Codigos_en_C",  // <--- IMPORTANTE: Para que encuentre los .h
+                "Codigos_en_C\\funciones_red.c",
+                "Codigos_en_C\\random.c",
+                "Codigos_en_C\\funciones_dinamica.c",
+                "TESTS\\test_nueva_variable.c",
+                "-o",
+                "TESTS\\test_nueva_variable.exe",
+                "-lm"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "ejecutar TEST_variable_O",
+            "type": "shell",
+            "command": ".\\TESTS\\test_nueva_variable.exe",
             "group": "test"
         }
 

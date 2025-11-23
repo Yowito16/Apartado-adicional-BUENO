@@ -1,4 +1,5 @@
 #include "funciones_red.h"
+#include "funciones_dinamica.h"
 
 // Definición de los arrays globales
 int xp[L*L*L];
@@ -135,7 +136,7 @@ int vecino_n_yp(int Nodo, int n){
 
 int vecino_n_zp(int Nodo, int n){
     for(int i=0;i<n;i++){
-        Nodo=Nodo+yp[Nodo];
+        Nodo=Nodo+zp[Nodo];
     }
     return Nodo;
 }
@@ -319,8 +320,8 @@ int indice_lado(int *plaquetas, int *aristas, int arista_actual){
     for(int i=0;i<4;i++){//SUMAMOS EL VALOR DE LAS 4 PLAQUETAS
         Sl+=plaquetas[indices_plaquetas[i]];
     }
-    //SL ES SOLO EL PRODUCTO DE LAS 3 ARISTAS QUE ACOMPAÑAN A LA ARISTA_ACTUAL
-    Sl/=arista_actual;
+    // SL debe normalizarse por el valor de la arista (±1), no por su índice
+    Sl /= aristas[arista_actual];
     //DEVOLVEMOS EL INDICE PARA LA FUNCION PRECALCULA_TABLA_SPIN
     return (Sl+4)/2;
 }
@@ -406,12 +407,12 @@ void indices_esquinas(int *aristas, int *plaquetas, int nodo, int plano, int ari
     Up=plaquetas[indice_plaqueta]/aristas[arista_1]/aristas[arista_2];
 
 
-    inidce_S1=(S1+3)/2;
-    indicce_S2=(S2+3)/2;
-    indice_Up=(Up+1)/2;
+    *inidce_S1 = (S1+3)/2;
+    *indicce_S2 = (S2+3)/2;
+    *indice_Up = (Up+1)/2;
 }
 
-void dame_O_n(int *aristas, int *plaquetas, int *O, int n, double tabla_promedio[4][4][2], double tabla_spin[5]){
+void dame_O_n(int *aristas, int *plaquetas, double *O, int n, double tabla_promedio[4][4][2], double tabla_spin[5]){
     int V=L*L*L;
     for(int i=0;i<V;i++){
         O[3*i]=un_loop_O_x(i,aristas,plaquetas,n,tabla_promedio,tabla_spin);
