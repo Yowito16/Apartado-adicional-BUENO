@@ -106,25 +106,24 @@ void calcular_correlaciones(const char *archivo_entrada, const char *archivo_sal
         return;
     }
 
-    double **vars = malloc(11 * sizeof(double*));
+    double **vars = malloc(3 * sizeof(double*));
     double *tiempo = NULL;
-    for (int i = 0; i < 11; i++) vars[i] = NULL;
+    for (int i = 0; i < 3; i++) vars[i] = NULL;
 
     int N = 0;
     while (1) {
-        double t, valores[11];
+        double t, valores[3];
         int leidos = fscanf(fin,
-            "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            "%lf %lf %lf %lf",
             &t,
-            &valores[0], &valores[1], &valores[2], &valores[3], &valores[4],
-            &valores[5], &valores[6], &valores[7], &valores[8], &valores[9], &valores[10]);
+            &valores[0], &valores[1], &valores[2]);//el 0 es la media de la plaqueta, el 1 la media del O_10, el 2 la magnetizacion
 
-        if (leidos != 12) break;
+        if (leidos != 4) break;
 
         tiempo = realloc(tiempo, sizeof(double) * (N + 1));
         tiempo[N] = t;
 
-        for (int j = 0; j < 11; j++) {
+        for (int j = 0; j < 3; j++) {
             vars[j] = realloc(vars[j], sizeof(double) * (N + 1));
             vars[j][N] = valores[j];
         }
@@ -133,8 +132,8 @@ void calcular_correlaciones(const char *archivo_entrada, const char *archivo_sal
     fclose(fin);
 
     // Calcular autocorrelaciones
-    double **corr = malloc(11 * sizeof(double*));
-    for (int j = 0; j < 11; j++) {
+    double **corr = malloc(3 * sizeof(double*));
+    for (int j = 0; j < 3; j++) {
         corr[j] = autocorrelacion(vars[j], N);
     }
 
@@ -149,7 +148,7 @@ void calcular_correlaciones(const char *archivo_entrada, const char *archivo_sal
     // Escribir
     for (int t = 0; t < N; t++) {
         fprintf(fout, "%d", t);
-        for (int j = 0; j < 11; j++) fprintf(fout, "\t%f", corr[j][t]);
+        for (int j = 0; j < 3; j++) fprintf(fout, "\t%f", corr[j][t]);
         fprintf(fout, "\n");
     }
 
@@ -157,7 +156,7 @@ void calcular_correlaciones(const char *archivo_entrada, const char *archivo_sal
     printf("Archivo de correlaciones creado: %s\n", archivo_salida);
 
     // Liberar
-    for (int j = 0; j < 11; j++) {
+    for (int j = 0; j < 3; j++) {
         free(vars[j]);
         free(corr[j]);
     }
@@ -214,15 +213,15 @@ void procesar_correlaciones(const char *carpeta_base) {
     double t;
     int N = 0;
     while (fscanf(f, "%lf", &t) == 1) {
-        for (int j = 0; j < 11; j++) fscanf(f, "%*lf");
+        for (int j = 0; j < 3; j++) fscanf(f, "%*lf");
         N++;
     }
     fclose(f);
     free(ruta_file);
 
     // Reservar espacio dinámico
-    double **valores[11];
-    for (int j = 0; j < 11; j++) {
+    double **valores[3];
+    for (int j = 0; j < 3; j++) {
         valores[j] = malloc(n_files * sizeof(double*));
         for (int k = 0; k < n_files; k++)
             valores[j][k] = malloc(N * sizeof(double));
@@ -237,7 +236,7 @@ void procesar_correlaciones(const char *carpeta_base) {
         for (int i = 0; i < N; i++) {
             double tiempo;
             fscanf(f, "%lf", &tiempo);
-            for (int j = 0; j < 11; j++)
+            for (int j = 0; j < 3; j++)
                 fscanf(f, "%lf", &valores[j][k][i]);
         }
         fclose(f);
@@ -245,14 +244,14 @@ void procesar_correlaciones(const char *carpeta_base) {
     }
 
     // Calcular medias y desviaciones
-    double *media[11], *desv[11];
-    for (int j = 0; j < 11; j++) {
+    double *media[3], *desv[3];
+    for (int j = 0; j < 3; j++) {
         media[j] = malloc(N*sizeof(double));
         desv[j]  = malloc(N*sizeof(double));
     }
 
     for (int i = 0; i < N; i++) {
-        for (int j = 0; j < 11; j++) {
+        for (int j = 0; j < 3; j++) {
             double sum = 0.0, sum2 = 0.0;
             for (int k = 0; k < n_files; k++) sum += valores[j][k][i];
             media[j][i] = sum / n_files;
@@ -267,7 +266,7 @@ void procesar_correlaciones(const char *carpeta_base) {
     f = fopen(ruta_file, "w");
     for (int i = 0; i < N; i++) {
         fprintf(f, "%d", i);
-        for (int j = 0; j < 11; j++)
+        for (int j = 0; j < 3; j++)
             fprintf(f, "\t%.6f\t%.6f", media[j][i], desv[j][i]);
         fprintf(f, "\n");
     }
@@ -278,7 +277,7 @@ void procesar_correlaciones(const char *carpeta_base) {
     ruta_file = concat_path(carpeta_base, "COMPATIBILIDAD.txt");
     f = fopen(ruta_file, "w");
 
-    for (int j = 0; j < 11; j++) {
+    for (int j = 0; j < 3; j++) {
         fprintf(f, "-----------VARIABLE %d-----------\n", j+1);
         fprintf(f, "Intervalos de tiempo en los que la correlación es compatible con 0:\n\n");
         int en_intervalo = 0;
@@ -299,7 +298,7 @@ void procesar_correlaciones(const char *carpeta_base) {
     free(ruta_file);
 
     // Liberar
-    for (int j = 0; j < 11; j++) {
+    for (int j = 0; j < 3; j++) {
         for (int k = 0; k < n_files; k++)
             free(valores[j][k]);
         free(valores[j]);
@@ -317,14 +316,18 @@ int main(){
     int s[3*L*L*L], plaquetas[3*L*L*L];
     double probabilidades[5];
 
+    
     /*
-
     int un_sweep = 3*L*L*L;
     int N_sweps_entre_med = 1;
-    int N_medidas = 2000;
+    int N_medidas = 10000;
+
+    double tabla_spin[5], tabla_bloque[4][4][2];
     
     vector_cociente_prob(probabilidades);
     inicializa_vectores_de_vecinos();
+    precalcula_tabla_spin(beta, tabla_spin);
+    promedio_bloque(beta, tabla_bloque);
 
     // Carpeta base según beta
     char folder_base_entrada[256];
@@ -381,7 +384,7 @@ int main(){
         guardar_parametros(input_file_config, N_sweps_entre_med, N_medidas);
         
         // Ejecutar dinámica de Metropolis
-        dinamica_metropolis(N_sweps_entre_med, N_medidas, probabilidades, s, plaquetas
+        dinamica_metropolis_O(N_sweps_entre_med, N_medidas, probabilidades, s, plaquetas, tabla_spin, tabla_bloque
         #ifdef correlacion
             , output_file_evol, param_file
         #endif
@@ -392,8 +395,8 @@ int main(){
         
         k++;
     }
-
     */
+    
     procesar_correlaciones("Resultados_simulacion/CORRELACION/0.72");
 
     return 0;
