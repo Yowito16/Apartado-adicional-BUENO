@@ -386,6 +386,7 @@ void dinamica_metropolis_w(
     , const char* filename_evolucion,
     const char* filename_param
 #endif
+    , int tiempo_limite // <--- NUEVO ARGUMENTO
 ) {
     int V = 3 * L * L * L;
 
@@ -423,6 +424,7 @@ void dinamica_metropolis_w(
         folder_param   = "Resultados_simulacion/TERMALIZACION/0.80/PARAMETROS";
     } else {
         printf("PON EL VALOR DE BETA QUE TOCA, AMIGO MIO");
+        return;
     }
 #else 
     folder_inicial = "Resultados_simulacion/CONFIGURACION_INICIAL";
@@ -486,7 +488,19 @@ void dinamica_metropolis_w(
     double media_w2, media_w3, media_w4, media_w5, media_w6, media_w7, media_w8, media_w9, media_w10;
     double media_plaqueta, mag;
 
+    printf("Iniciando simulacion W con limite de tiempo: %d segundos...\n", tiempo_limite);
+
     for (paso = 1; paso <= N_medidas; paso++) {
+        // 1. Chequeo de tiempo ANTES de realizar el paso costoso
+        clock_t tiempo_actual = clock();
+        double segundos_transcurridos = (double)(tiempo_actual - inicio_total) / CLOCKS_PER_SEC;
+        
+        if (segundos_transcurridos >= tiempo_limite) {
+            printf("⏳ Tiempo limite alcanzado (%.2f s >= %d s). Finalizando simulacion W en paso %d.\n", 
+                   segundos_transcurridos, tiempo_limite, paso - 1);
+            break; // Salir del bucle
+        }
+
         // Tiempo de Metropolis
         inicio_metropolis = clock();
         N_pasos_metropolis(N_sweeps_entre_med, aristas, plaquetas, probabilidades, &aceptadas);
@@ -537,6 +551,9 @@ void dinamica_metropolis_w(
                 media_w7, media_w8, media_w9, media_w10);
         fprintf(foutput, "%f\n", mag);
 
+        // Forzar escritura
+        // fflush(foutput);
+
         fin_io = clock();
         tiempo_io += (double)(fin_io - inicio_io) / CLOCKS_PER_SEC;
     }
@@ -573,11 +590,13 @@ void dinamica_metropolis_w(
     fin_total = clock();
     tiempo_total = (double)(fin_total - inicio_total) / CLOCKS_PER_SEC;
 
-    printf("\n=== DESGLOSE DE TIEMPOS ===\n");
+    printf("\n=== DESGLOSE DE TIEMPOS W ===\n");
     printf("Tiempo total: %.2f s\n", tiempo_total);
-    printf(" - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
-    printf(" - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
-    printf(" - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+    if(tiempo_total > 0) {
+        printf(" - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
+        printf(" - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
+        printf(" - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+    }
 
     // -------------------------
     // Guardar tiempo total en archivo de parámetros
@@ -592,9 +611,12 @@ void dinamica_metropolis_w(
 
     if (fparam) {
         fprintf(fparam, "Tiempo_total(s)\t%f\n", tiempo_total);
-        fprintf(fparam," - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
-        fprintf(fparam," - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
-        fprintf(fparam," - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+        if(tiempo_total > 0) {
+            fprintf(fparam," - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
+            fprintf(fparam," - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
+            fprintf(fparam," - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+        }
+        fprintf(fparam, "Pasos_realizados\t%d\n", paso - 1); // Guardar cuántos pasos se hicieron
         fclose(fparam);
 #ifdef correlacion
         printf("Tiempo total guardado en %s\n", filename_param);
@@ -618,6 +640,7 @@ void dinamica_metropolis_O(
     , const char* filename_evolucion,
     const char* filename_param
 #endif
+    , int tiempo_limite // <--- NUEVO ARGUMENTO (en segundos)
 ) {
     int V = 3 * L * L * L;
 
@@ -655,6 +678,7 @@ void dinamica_metropolis_O(
         folder_param   = "Resultados_simulacion/TERMALIZACION/0.80/PARAMETROS";
     } else {
         printf("PON EL VALOR DE BETA QUE TOCA, AMIGO MIO");
+        return;
     }
 #else 
     folder_inicial = "Resultados_simulacion/CONFIGURACION_INICIAL";
@@ -717,7 +741,19 @@ void dinamica_metropolis_O(
     double media_O_10;
     double media_plaqueta, mag;
 
+    printf("Iniciando simulacion O con limite de tiempo: %d segundos...\n", tiempo_limite);
+
     for (paso = 1; paso <= N_medidas; paso++) {
+        // 1. Chequeo de tiempo ANTES de realizar el paso costoso
+        clock_t tiempo_actual = clock();
+        double segundos_transcurridos = (double)(tiempo_actual - inicio_total) / CLOCKS_PER_SEC;
+        
+        if (segundos_transcurridos >= tiempo_limite) {
+            printf("⏳ Tiempo limite alcanzado (%.2f s >= %d s). Finalizando simulacion en paso %d.\n", 
+                   segundos_transcurridos, tiempo_limite, paso - 1);
+            break; // Salir del bucle
+        }
+
         // Tiempo de Metropolis
         inicio_metropolis = clock();
         N_pasos_metropolis(N_sweeps_entre_med, aristas, plaquetas, probabilidades, &aceptadas);
@@ -746,15 +782,18 @@ void dinamica_metropolis_O(
         inicio_io = clock();
 
         fprintf(foutput, "%d\t%f\t", paso * N_sweeps_entre_med, media_plaqueta);
-        fprintf(foutput, "%f\t", 
-                media_O_10);
+        fprintf(foutput, "%f\t", media_O_10);
         fprintf(foutput, "%f\n", mag);
+
+        // Forzar escritura en disco por si se corta abruptamente después
+        // fflush(foutput); 
 
         fin_io = clock();
         tiempo_io += (double)(fin_io - inicio_io) / CLOCKS_PER_SEC;
     }
 
     fclose(foutput);
+    free(O_10); // Liberar memoria del array auxiliar
 
 #ifndef correlacion
     // -------------------------
@@ -788,9 +827,11 @@ void dinamica_metropolis_O(
 
     printf("\n=== DESGLOSE DE TIEMPOS ===\n");
     printf("Tiempo total: %.2f s\n", tiempo_total);
-    printf(" - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
-    printf(" - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
-    printf(" - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+    if(tiempo_total > 0) {
+        printf(" - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
+        printf(" - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
+        printf(" - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+    }
 
     // -------------------------
     // Guardar tiempo total en archivo de parámetros
@@ -805,9 +846,12 @@ void dinamica_metropolis_O(
 
     if (fparam) {
         fprintf(fparam, "Tiempo_total(s)\t%f\n", tiempo_total);
-        fprintf(fparam," - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
-        fprintf(fparam," - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
-        fprintf(fparam," - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+        if(tiempo_total > 0) {
+            fprintf(fparam," - Metropolis: %.2f s (%.1f%%)\n", tiempo_metropolis, (tiempo_metropolis/tiempo_total)*100.0);
+            fprintf(fparam," - Cálculos: %.2f s (%.1f%%)\n", tiempo_calculos, (tiempo_calculos/tiempo_total)*100.0);
+            fprintf(fparam," - I/O: %.2f s (%.1f%%)\n", tiempo_io, (tiempo_io/tiempo_total)*100.0);
+        }
+        fprintf(fparam, "Pasos_realizados\t%d\n", paso - 1); // Guardar cuántos pasos se hicieron realmente
         fclose(fparam);
 #ifdef correlacion
         printf("Tiempo total guardado en %s\n", filename_param);

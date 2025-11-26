@@ -36,6 +36,7 @@ void dinamica_metropolis_w(int N_sweeps_entre_med, int N_medidas, double probabi
 #ifdef correlacion
     , const char* filename_evolucion, const char* filename_parametros
 #endif
+    ,int tiempo_limite // <--- NUEVO ARGUMENTO (en segundos)
     );
 
 void dinamica_metropolis_O(
@@ -50,6 +51,7 @@ void dinamica_metropolis_O(
     , const char* filename_evolucion,
     const char* filename_param
 #endif
+    , int tiempo_limite // <--- NUEVO ARGUMENTO (en segundos)
 ); 
 
 void crea_configuracionInicial_termalizacion( int flag, int *s);
