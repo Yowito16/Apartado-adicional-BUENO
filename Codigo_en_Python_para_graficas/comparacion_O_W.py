@@ -44,7 +44,7 @@ try:
 
     # Eje X
     ax1.set_xticks([0, 1])
-    ax1.set_xticklabels(['Variable O\n(Multinivel)', 'Variable W\n(Estándar)'])
+    ax1.set_xticklabels(['Variable O$\'$\n(Multinivel)', 'Variable W\n(Estándar)'])
     ax1.set_xlim(-0.5, 1.5)
 
     # Formateador personalizado para Eje Y
@@ -66,7 +66,7 @@ try:
     
     # Leyenda
     legend_elements = [
-        Line2D([0], [0], marker='o', color='w', label='Variable O', 
+        Line2D([0], [0], marker='o', color='w', label='Variable O$\'$', 
                markerfacecolor='blue', markersize=12),
         Line2D([0], [0], marker='o', color='w', label='Variable W', 
                markerfacecolor='red', markersize=12)
