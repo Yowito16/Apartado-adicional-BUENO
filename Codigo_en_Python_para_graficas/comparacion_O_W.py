@@ -44,7 +44,7 @@ try:
 
     # Eje X
     ax1.set_xticks([0, 1])
-    ax1.set_xticklabels(['Variable O$\'$\n(Multinivel)', 'Variable W\n(Estándar)'])
+    ax1.set_xticklabels(['Variable O$\'$\n', 'Variable W\n'])
     ax1.set_xlim(-0.5, 1.5)
 
     # Formateador personalizado para Eje Y
